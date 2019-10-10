@@ -15,6 +15,9 @@ pulseCount VAR Byte
 
 ' -----[ Initialization ]-----------------------------------------------------
 FREQOUT 4, 2000, 3000 ' Signal program start/reset.
+  "IR DETECTORS", CR,
+  "Left Right", CR,
+  "----- -----"
 
 ' -----[ Main Routine ]-------------------------------------------------------
 DO
@@ -23,22 +26,30 @@ DO
   FREQOUT 2, 1, 38500
   irDetectFront = IN0
 
-  IF (irDetectLeft = 0) AND (irDetectFront = 0) THEN
-    GOSUB
-    GOSUB Forward_B4_Turn
-    GOSUB Forward_B4_Turn
-  ELSEIF (irDetectLeft = 0) THEN
-    GOSUB Turn_Right
-  ELSEIF (irDetectFront = 0) THEN
-    GOSUB
-    GOSUB Forward_B4_Turn
-  ELSE
+  IF (irDetectLeft = 0) AND (irDetectFront = 1) THEN
     GOSUB Forward_Pulse
+  ELSEIF (irDetectLeft = 0) AND (irDetectFront = 0) THEN
+    GOSUB Forward_B4_Turn
+    GOSUB Turn_Right
+  ENDIF
+  
+  irDetectRight = IN0
+  IF (irDetectLeft = 0) THEN
+    HIGH 10
+  ELSE
+    LOW 10
+  ENDIF
+
+  IF (irDetectRight = 0) THEN
+    HIGH 1
+  ELSE
+    LOW 1
   ENDIF
 LOOP
 
 ' -----[ Subroutines ]--------------------------------------------------------
-Forward_Pulse: ' Send a single forward pulse.
+Forward_Pulse: ' Send a forward pulse.
+  FOR pulseCount = 0 to 50
     PULSOUT 13, 850
     PULSOUT 12, 650
     PAUSE 20
@@ -54,16 +65,16 @@ RETURN
 
 Turn_Right:
   FOR pulseCount = 0 TO 20 ' Right turn, about 90-degrees. (Adapted from RoamingWithIR)
-    PULSOUT 13,
+    PULSOUT 13, 
     PULSOUT 12,
     PAUSE 20
   NEXT
 RETURN
 
 Rotate_Right: 'Rotate 90 degrees to the right on its axis.
-  DO
+  FOR pulseCount = 0 TO 10
     PULSOUT 13, 650
-    PULSOUT 12, 7501
+    PULSOUT 12, 750
     PAUSE 20
   NEXT
 RETURN
@@ -74,7 +85,6 @@ RETURN
 'If left is 0 and front is 1 , forward
 'If left is 0 and front is 0 , rotate 90 degrees
 'If left is 0 and front is 1, forward
-'If
 '
 '
 '
