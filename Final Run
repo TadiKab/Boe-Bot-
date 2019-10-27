@@ -1,0 +1,88 @@
+' -----[ Title ]--------------------------------------------------------------
+' Robotics with the Boe-Bot.
+'Hoping it can run the maze
+' Adapted from RoamingWithIR to run the maze.
+' {$STAMP BS2} ' Stamp directive.
+' {$PBASIC 2.5} ' PBASIC directive.
+
+DEBUG "Program Running!"
+
+' -----[ Variables ]----------------------------------------------------------
+irDetectLeft VAR Bit
+irDetectFront VAR Bit
+pulseCount VAR Byte
+
+' -----[ Initialization ]-----------------------------------------------------
+FREQOUT 4, 2000, 3000 ' Signal program start/reset.
+
+' -----[ Main Routine ]-------------------------------------------------------
+DO
+  FREQOUT 8, 1, 1000 ' Numbers decreased from 38500 in order to weaken the strength of the IR scanners
+  irDetectLeft = IN9  
+  FREQOUT 2, 1, 1000 ' Numbers decreased from 38500 in order to weaken the strength of the IR scanners
+  irDetectFront = IN0
+
+  IF (irDetectLeft = 0) AND (irDetectFront = 1) THEN
+    GOSUB Forward_Pulse
+  ELSEIF (irDetectLeft = 0) AND (irDetectFront = 0)THEN
+    GOSUB Risky_Forward
+    GOSUB Rotate_Right
+  ELSEIF (irDetectLeft = 1) AND (irDetectFront = 1) THEN
+    GOSUB Risky_Forward
+  ELSEIF (irDetectLeft = 1) AND (irDetectFront = 0) THEN
+    GOSUB Forward_Pulse
+    GOSUB Turn_Left
+  ENDIF ' and check again
+LOOP
+
+' -----[ Subroutines ]--------------------------------------------------------
+Forward_Pulse: ' Send singular forward pulse. Adapted from RoamingWithIr 
+    PULSOUT 13,850
+    PULSOUT 12,650
+    PAUSE 20 
+RETURN
+
+Turn_Left: ' Left turn, about 90-degrees.
+  FOR pulseCount = 0 TO 18
+    PULSOUT 13, 650
+    PULSOUT 12, 650
+    PAUSE 20
+  NEXT
+RETURN
+
+Rotate_Right: 'Rotate 90 degrees to the right on the axis. Adapted from TurnLeftWheelContinuously
+  FOR pulseCount = 0 TO 20
+    PULSOUT 12, 850
+    PULSOUT 13, 850
+    PAUSE 20
+  NEXT
+RETURN
+
+Risky_Forward: ' Send two pulses to move slightly forward before a turn, that could lead to a wall bump.
+   FOR pulseCount = 0 TO 2
+    PULSOUT 13, 850
+    PULSOUT 12, 650
+    PAUSE 20
+   NEXT
+RETURN
+
+Double_Risky_Forward: ' Send four pulses to move slightly forward before a turn, that could lead to a wall bump.
+   FOR pulseCount = 0 TO 4
+    PULSOUT 13, 850
+    PULSOUT 12, 650
+    PAUSE 20
+   NEXT
+RETURN
+
+Triple_Risky_Forward: ' Send six pulses to move slightly forward before a turn, that could lead to a wall bump.
+   FOR pulseCount = 0 TO 6
+    PULSOUT 13, 850
+    PULSOUT 12, 650
+    PAUSE 20
+   NEXT
+RETURN
+' -----[Explanation]-------------------------------------------------------------------------------------------
+'If left is 0 and front is 1 , move 10 pulses forward
+'If left is 0 and front is 0 , move forward and then rotate 90° right
+'If left is 1 and front is 0, move forward 10 pulses and then rotate 90° left
+'If left is 1 and front is 1, move 10 pulses forward
