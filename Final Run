@@ -1,6 +1,6 @@
 ' -----[ Title ]--------------------------------------------------------------
 ' Robotics with the Boe-Bot.
-'Hoping it can run the maze
+' Hoping it can run the maze
 ' Adapted from RoamingWithIR to run the maze.
 ' {$STAMP BS2} ' Stamp directive.
 ' {$PBASIC 2.5} ' PBASIC directive.
@@ -22,14 +22,26 @@ DO
   FREQOUT 2, 1, 1000 ' Numbers decreased from 38500 in order to weaken the strength of the IR scanners
   irDetectFront = IN0
 
-  IF (irDetectLeft = 0) AND (irDetectFront = 1) THEN
+  IF (irDetectLeft = 0) THEN 'Code Taken from TestIrPairsAndIndicators to switch the lights on
+    HIGH 10
+  ELSE
+    LOW 10
+  ENDIF
+
+  IF (irDetectRight = 0) THEN 'Code Taken from TestIrPairsAndIndicators to switch the lights on
+    HIGH 1
+  ELSE
+    LOW 1
+  ENDIF
+  
+  IF (irDetectLeft = 0) AND (irDetectFront = 1) THEN 'When there is a wall to the left and nothing infront move forward
     GOSUB Forward_Pulse
-  ELSEIF (irDetectLeft = 0) AND (irDetectFront = 0)THEN
-    GOSUB Risky_Forward
+  ELSEIF (irDetectLeft = 0) AND (irDetectFront = 0)THEN 'When there is a wall to the left and to the front move forward then turn right
+    GOSUB Forward_Pulse
     GOSUB Rotate_Right
-  ELSEIF (irDetectLeft = 1) AND (irDetectFront = 1) THEN
+  ELSEIF (irDetectLeft = 1) AND (irDetectFront = 1) THEN 'When there is no wall to the left and no wall to the front move forward
     GOSUB Risky_Forward
-  ELSEIF (irDetectLeft = 1) AND (irDetectFront = 0) THEN
+  ELSEIF (irDetectLeft = 1) AND (irDetectFront = 0) THEN 'When there is no wall to the left and  a wall to the front move forward the turn left
     GOSUB Forward_Pulse
     GOSUB Turn_Left
   ENDIF ' and check again
@@ -43,7 +55,7 @@ Forward_Pulse: ' Send singular forward pulse. Adapted from RoamingWithIr
 RETURN
 
 Turn_Left: ' Left turn, about 90-degrees.
-  FOR pulseCount = 0 TO 18
+  FOR pulseCount = 0 TO 11
     PULSOUT 13, 650
     PULSOUT 12, 650
     PAUSE 20
@@ -51,9 +63,9 @@ Turn_Left: ' Left turn, about 90-degrees.
 RETURN
 
 Rotate_Right: 'Rotate 90 degrees to the right on the axis. Adapted from TurnLeftWheelContinuously
-  FOR pulseCount = 0 TO 20
+  FOR pulseCount = 0 TO 12
     PULSOUT 12, 850
-    PULSOUT 13, 850
+    PULSOUT 13, 800
     PAUSE 20
   NEXT
 RETURN
